@@ -1,15 +1,15 @@
 /* ============================================================
-   COLOR — Medicare ATX
+   COLOR — Big Sioux Benefits
    "Soft UI Evolution + Accessible & Ethical"
-   Light-first, high-contrast, WCAG-minded. Brand colors pulled
-   from medicareatx.com: navy (#1d5082 / #143b6b) leads, gold
-   (#e5b322) is the warm signature, orange (#f2592b) is the CTA
-   spark, teal (#327c6a) threads the cool accents.
+   Light-first, high-contrast, WCAG-minded. Brand colors: deep
+   navy (#13243b / #1d5082) leads, warm tan (#c2935e) is the
+   signature accent, orange (#f2592b) is the CTA spark, teal
+   (#327c6a) threads the cool accents.
    ============================================================ */
 :root{
   /* ---- Navy (primary brand) ---- */
-  --navy-900:#0f2c4d;   /* deepest ink-navy */
-  --navy-800:#143b6b;   /* dark navy (brand) */
+  --navy-900:#0c1b2e;   /* deepest ink-navy */
+  --navy-800:#13243b;   /* dark navy (brand) */
   --navy-700:#1d5082;   /* primary navy (brand) */
   --navy-600:#2a6098;
   --navy-500:#3a72ac;   /* interactive */
@@ -18,13 +18,13 @@
   --navy-100:#e7eef6;   /* soft tint surface */
   --navy-050:#f2f6fb;
 
-  /* ---- Gold (warm signature) ---- */
-  --gold-800:#6e5200;
-  --gold-700:#8a6a00;   /* gold, text-safe on white (≈4.7:1) */
-  --gold-600:#b78c10;
-  --gold-500:#e5b322;   /* brand gold (decor / fills) */
-  --gold-300:#f3d271;
-  --gold-100:#fbf3d6;   /* gold wash */
+  /* ---- Tan (warm signature) ---- */
+  --gold-800:#5e4422;
+  --gold-700:#855e30;   /* tan, text-safe on white (≈4.6:1) */
+  --gold-600:#9a7038;
+  --gold-500:#c2935e;   /* brand tan (decor / fills) */
+  --gold-300:#dcc09b;
+  --gold-100:#f3ead9;   /* tan wash */
 
   /* ---- Orange (CTA spark) ---- */
   --orange-700:#bd3d16;

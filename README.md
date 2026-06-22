@@ -1,8 +1,9 @@
-# Demo Template — medicareatx.com
+# Demo Template — Big Sioux Benefits
 
-A demo marketing website template for **medicareatx.com**, built with [Astro](https://astro.build/).
-This repository contains the complete site source plus the `.claude/` tooling folder
-(Claude Code skills and agents) used to build and maintain it.
+A demo marketing website template for **Big Sioux Benefits**, a fictional independent Medicare
+agency in Sioux Falls, SD, built with [Astro](https://astro.build/). The brand is illustrative
+(not a real business). This repository contains the complete site source plus the `.claude/`
+tooling folder (Claude Code skills and agents) used to build and maintain it.
 
 ## Tech stack
 

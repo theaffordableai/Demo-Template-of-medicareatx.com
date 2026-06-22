@@ -10,18 +10,18 @@ export interface Post {
 
 export const posts: Post[] = [
   {
-    slug: "medicare-williamson-county-round-rock-2026",
-    title: "Medicare in Williamson County, TX: Your 2026 Plan Guide",
-    excerpt: "Round Rock, Cedar Park and Georgetown share the competitive Austin Medicare market — but the choices that decide your costs are local. We map the 2026 Williamson County plan landscape with real data: the new Part D $2,100 cap, the Baylor Scott & White-vs-St. David's-vs-Ascension Seton network question, and the county's chronic-condition picture from CDC PLACES.",
+    slug: "medicare-lincoln-county-sd-2026",
+    title: "Medicare in Lincoln County, SD: Your 2026 Plan Guide",
+    excerpt: "Harrisburg, Tea and Canton anchor one of South Dakota's fastest-growing counties — but the choices that decide your costs are local. We map the 2026 Lincoln County plan landscape with real data: the new Part D $2,100 cap, the Sanford-vs-Avera network question, and the county's chronic-condition picture from CDC PLACES.",
     date: "June 18, 2026",
-    img: "/img/atx/hero2.jpg",
+    img: "/img/blog/mike-plan-comparison.png",
   },
   {
-    slug: "turning-65-austin-texas-2026",
-    title: "Turning 65 in Austin, Texas: Your 2026 Medicare Roadmap",
-    excerpt: "Your 7-month Initial Enrollment Period, the four parts of Medicare, the competitive Austin-metro plan landscape (Travis, Williamson & Hays counties), the new 2026 Part D $2,100 out-of-pocket cap, and the Ascension-vs-St. David's-vs-Baylor Scott & White network choice that decides your costs.",
+    slug: "turning-65-sioux-city-iowa-2026",
+    title: "Turning 65 in Sioux City, Iowa: Your 2026 Medicare Roadmap",
+    excerpt: "Your 7-month Initial Enrollment Period, the four parts of Medicare, the Siouxland plan landscape across Woodbury County, the new 2026 Part D $2,100 out-of-pocket cap, and the MercyOne-vs-UnityPoint St. Luke's network choice that decides your costs.",
     date: "June 19, 2026",
-    img: "/img/atx/hero.jpg",
+    img: "/img/blog/mike-turning65-couple.png",
   },
   {
     slug: "part-d-drug-cost-cap-sioux-falls-2026",
