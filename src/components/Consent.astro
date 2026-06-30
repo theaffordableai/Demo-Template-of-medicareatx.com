@@ -1,31 +1,152 @@
 ---
-// Tracking-consent gate. Tracking/marketing pixels (GHL/GA/Meta) must not fire
-// until the visitor accepts — sets window.__consent + a flag GHL.astro checks.
+// Cookie / tracking-consent manager. Nothing that tracks (GHL/GA/Meta, chat,
+// booking) fires until the visitor opts in — required for HIPAA/CIPA on a
+// Medicare site. Granular categories; reopenable from the footer via
+// window.openCookieSettings(). Sets window.__consent + window.__consentCats
+// and triggers window.__loadTracking() only when a non-essential category is on.
 ---
-<div class="consent" id="consent" role="dialog" aria-modal="false" aria-label="Privacy and tracking consent">
-  <div class="ttl">We value your privacy</div>
-  <p>We use cookies and tracking (analytics plus our booking and chat tools) to improve your experience. Nothing that tracks you runs until you choose. Read our <a href="/privacy">Privacy Policy</a>.</p>
-  <div class="row">
-    <button class="btn btn-primary" id="consentAccept">Accept all</button>
-    <button class="btn btn-ghost" id="consentReject">Reject non-essential</button>
+<div class="cc-backdrop" id="ccBackdrop" hidden></div>
+<section class="cc" id="consent" role="dialog" aria-modal="false" aria-labelledby="ccTitle" data-view="banner" hidden>
+  <!-- ── Banner view ── -->
+  <div class="cc-banner">
+    <div class="cc-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none">
+        <path d="M21.5 12a9.5 9.5 0 1 1-9.9-9.49 3.2 3.2 0 0 0 3.06 4.2 3.2 3.2 0 0 0 3.2 3.2 3.2 3.2 0 0 0 3.58 1.93c0 .05.06.1.06.16Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+        <circle cx="9" cy="11" r="1.1" fill="currentColor"/><circle cx="13.5" cy="15.5" r="1.1" fill="currentColor"/><circle cx="8" cy="16" r="1" fill="currentColor"/>
+      </svg>
+    </div>
+    <div class="cc-copy">
+      <h2 id="ccTitle">We value your privacy</h2>
+      <p>We use cookies for essential site features and — only with your permission — analytics and our booking &amp; chat tools. Nothing that tracks you runs until you choose. See our <a href="/privacy">Privacy Policy</a>.</p>
+    </div>
+    <div class="cc-actions">
+      <button class="btn btn-accent" id="ccAccept">Accept all</button>
+      <button class="btn btn-ghost" id="ccReject">Reject non-essential</button>
+      <button class="cc-link" id="ccCustomize">Customize</button>
+    </div>
   </div>
-</div>
+
+  <!-- ── Preferences view ── -->
+  <div class="cc-prefs">
+    <div class="cc-prefs-head">
+      <h2>Cookie preferences</h2>
+      <button class="cc-x" id="ccClose" aria-label="Close cookie preferences" title="Close">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <p class="cc-prefs-sub">Choose what we may use. You can change this anytime from the footer.</p>
+
+    <ul class="cc-cats">
+      <li class="cc-cat">
+        <div class="cc-cat-txt"><strong>Strictly necessary</strong><span>Security, page navigation and form submission. Always on.</span></div>
+        <span class="cc-switch is-locked" role="switch" aria-checked="true" aria-disabled="true" aria-label="Strictly necessary (always on)"><i></i></span>
+      </li>
+      <li class="cc-cat">
+        <div class="cc-cat-txt"><strong>Analytics</strong><span>Anonymous, consent-gated stats on which pages help visitors most.</span></div>
+        <button class="cc-switch" id="ccAnalytics" role="switch" aria-checked="false" aria-label="Analytics cookies"><i></i></button>
+      </li>
+      <li class="cc-cat">
+        <div class="cc-cat-txt"><strong>Booking &amp; chat (marketing)</strong><span>Loads our scheduling and live-chat tools so you can reach an advisor.</span></div>
+        <button class="cc-switch" id="ccMarketing" role="switch" aria-checked="false" aria-label="Booking and chat cookies"><i></i></button>
+      </li>
+    </ul>
+
+    <div class="cc-prefs-actions">
+      <button class="btn btn-primary" id="ccSave">Save my choices</button>
+      <button class="btn btn-ghost" id="ccAcceptAll2">Accept all</button>
+    </div>
+  </div>
+</section>
+
 <script is:inline>
 (function(){
-  var KEY='consent-v1', el=document.getElementById('consent');
-  var saved=null; try{saved=localStorage.getItem(KEY)}catch(e){}
-  function hide(){el.style.display='none';}
-  function set(v){try{localStorage.setItem(KEY,v)}catch(e){}; window.__consent=v;
-    if(v==='accept' && typeof window.__loadTracking==='function'){window.__loadTracking();} hide();}
-  if(saved){window.__consent=saved; hide(); if(saved==='accept'&&typeof window.__loadTracking==='function'){window.__loadTracking();}}
-  document.getElementById('consentAccept').addEventListener('click',function(){set('accept');});
-  document.getElementById('consentReject').addEventListener('click',function(){set('reject');});
+  var KEY='cookie-consent-v2', el=document.getElementById('consent'), back=document.getElementById('ccBackdrop');
+  var elA=document.getElementById('ccAnalytics'), elM=document.getElementById('ccMarketing');
+  var cats={necessary:true,analytics:false,marketing:false};
+  function read(){try{var s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&typeof s==='object'){cats.analytics=!!s.analytics;cats.marketing=!!s.marketing;return s;}}catch(e){}return null;}
+  function publish(){
+    window.__consentCats={necessary:true,analytics:cats.analytics,marketing:cats.marketing};
+    window.__consent=(cats.analytics||cats.marketing)?'accept':'reject';
+    try{localStorage.setItem('consent-v1',window.__consent);}catch(e){}
+    if(typeof window.__applyConsent==='function'){window.__applyConsent(window.__consentCats);}
+    else if(window.__consent==='accept'&&typeof window.__loadTracking==='function'){window.__loadTracking();}
+  }
+  function save(){try{localStorage.setItem(KEY,JSON.stringify({necessary:true,analytics:cats.analytics,marketing:cats.marketing,v:2}));}catch(e){}publish();}
+  function paint(){if(elA)elA.setAttribute('aria-checked',cats.analytics?'true':'false');if(elM)elM.setAttribute('aria-checked',cats.marketing?'true':'false');}
+  function show(view){el.setAttribute('data-view',view);el.hidden=false;if(view==='prefs'){back.hidden=false;}requestAnimationFrame(function(){el.setAttribute('data-show','1');});}
+  function hide(){el.setAttribute('data-show','0');back.hidden=true;setTimeout(function(){el.hidden=true;},220);}
+
+  var existing=read(); paint();
+  if(existing){ publish(); }            // returning visitor: apply silently, no banner
+  else { show('banner'); }              // first visit: ask
+
+  document.getElementById('ccAccept').addEventListener('click',function(){cats.analytics=true;cats.marketing=true;paint();save();hide();});
+  document.getElementById('ccAcceptAll2').addEventListener('click',function(){cats.analytics=true;cats.marketing=true;paint();save();hide();});
+  document.getElementById('ccReject').addEventListener('click',function(){cats.analytics=false;cats.marketing=false;paint();save();hide();});
+  document.getElementById('ccCustomize').addEventListener('click',function(){show('prefs');});
+  document.getElementById('ccSave').addEventListener('click',function(){save();hide();});
+  document.getElementById('ccClose').addEventListener('click',hide);
+  back.addEventListener('click',hide);
+  [elA,elM].forEach(function(sw){if(!sw)return;sw.addEventListener('click',function(){var on=sw.getAttribute('aria-checked')==='true';sw.setAttribute('aria-checked',on?'false':'true');if(sw===elA)cats.analytics=!on;else cats.marketing=!on;});});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!el.hidden)hide();});
+
+  // Footer / anywhere: reopen the preferences manager.
+  window.openCookieSettings=function(){read();paint();show('prefs');};
 })();
 </script>
+
 <style>
-  .consent{position:fixed;left:1rem;right:1rem;bottom:1rem;z-index:300;max-width:760px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 30px 70px -20px rgba(10,34,51,.5);padding:1.2rem 1.4rem}
-  .consent .ttl{font-weight:700;margin-bottom:.3rem}
-  .consent p{font-size:.88rem;color:var(--muted);margin:0 0 .9rem}
-  .consent .row{display:flex;gap:.6rem;flex-wrap:wrap}
-  .consent .btn{padding:.6rem 1.1rem;font-size:.92rem}
+  .cc-backdrop{position:fixed;inset:0;z-index:330;background:rgba(12,27,46,.34);backdrop-filter:blur(2px);opacity:0;transition:opacity .22s}
+  .cc[data-show="1"]~.cc-backdrop{opacity:1}
+  .cc-backdrop[hidden]{display:none}
+
+  .cc{position:fixed;left:1rem;right:1rem;bottom:1rem;z-index:340;max-width:660px;margin:0 auto;background:var(--surface-card);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-xl);overflow:hidden;opacity:0;transform:translateY(14px) scale(.99);transition:opacity .22s ease,transform .22s ease}
+  .cc[data-show="1"]{opacity:1;transform:translateY(0) scale(1)}
+  .cc[hidden]{display:none}
+  .cc::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--navy-700),var(--gold-500) 60%,var(--orange-500))}
+
+  /* view toggling */
+  .cc .cc-banner,.cc .cc-prefs{padding:1.3rem 1.45rem}
+  .cc[data-view="banner"] .cc-prefs{display:none}
+  .cc[data-view="prefs"] .cc-banner{display:none}
+
+  /* banner */
+  .cc-banner{display:grid;grid-template-columns:auto 1fr;gap:.9rem 1rem;align-items:start}
+  .cc-icon{grid-row:span 2;width:46px;height:46px;border-radius:var(--r-md);background:var(--navy-050);color:var(--navy-700);display:grid;place-items:center}
+  .cc-copy h2{font-family:var(--font-display);font-weight:700;font-size:1.18rem;margin:0 0 .25rem;color:var(--ink-900)}
+  .cc-copy p{font-size:.9rem;line-height:1.6;color:var(--text-muted);margin:0}
+  .cc-copy a{color:var(--link);font-weight:600;text-decoration:underline;text-underline-offset:2px}
+  .cc-actions{grid-column:1 / -1;display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;margin-top:.3rem}
+  .cc-actions .btn{padding:.7rem 1.3rem;font-size:.92rem;min-height:44px}
+  .cc-link{background:none;border:0;cursor:pointer;font:600 .9rem var(--font-sans);color:var(--navy-700);text-decoration:underline;text-underline-offset:3px;padding:.4rem .2rem;margin-left:auto}
+  .cc-link:hover{color:var(--navy-800)}
+
+  /* preferences */
+  .cc-prefs-head{display:flex;align-items:center;justify-content:space-between;gap:1rem}
+  .cc-prefs-head h2{font-family:var(--font-display);font-weight:700;font-size:1.18rem;margin:0;color:var(--ink-900)}
+  .cc-x{flex:none;width:32px;height:32px;border-radius:var(--r-pill);border:1px solid var(--line);background:var(--surface-panel);color:var(--text-muted);display:grid;place-items:center;cursor:pointer;transition:color .2s,border-color .2s,background .2s}
+  .cc-x:hover{color:var(--ink-900);border-color:var(--line-strong);background:var(--paper)}
+  .cc-prefs-sub{font-size:.86rem;color:var(--text-muted);margin:.35rem 0 1rem}
+  .cc-cats{list-style:none;margin:0 0 1.1rem;padding:0;display:flex;flex-direction:column;gap:.55rem}
+  .cc-cat{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.85rem 1rem;border:1px solid var(--line);border-radius:var(--r-md);background:var(--paper)}
+  .cc-cat-txt{display:flex;flex-direction:column;gap:.15rem}
+  .cc-cat-txt strong{font:700 .92rem var(--font-sans);color:var(--ink-900)}
+  .cc-cat-txt span{font-size:.78rem;line-height:1.45;color:var(--text-muted)}
+
+  .cc-switch{flex:none;width:46px;height:26px;border-radius:var(--r-pill);border:0;background:var(--slate-300);position:relative;cursor:pointer;transition:background .2s;padding:0}
+  .cc-switch i{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:var(--shadow-xs);transition:transform .2s}
+  .cc-switch[aria-checked="true"]{background:var(--teal-500)}
+  .cc-switch[aria-checked="true"] i{transform:translateX(20px)}
+  .cc-switch.is-locked{background:var(--teal-500);cursor:not-allowed;opacity:.65}
+  .cc-switch.is-locked i{transform:translateX(20px)}
+
+  .cc-prefs-actions{display:flex;gap:.7rem;flex-wrap:wrap}
+  .cc-prefs-actions .btn{padding:.7rem 1.3rem;font-size:.92rem;min-height:44px}
+
+  @media(max-width:540px){
+    .cc-banner{grid-template-columns:1fr}
+    .cc-icon{grid-row:auto}
+    .cc-actions .btn{flex:1 1 auto;justify-content:center}
+    .cc-link{margin-left:0;width:100%;text-align:center}
+  }
 </style>

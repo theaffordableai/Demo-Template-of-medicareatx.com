@@ -38,7 +38,7 @@ const company = [
     <p>We do not offer every plan available in your area. Any information we provide is limited to those plans we do offer in your area. Please contact Medicare.gov, 1‑800‑MEDICARE, or your local State Health Insurance Program (SHIP) to get information on all of your options. {b.name} is a licensed independent insurance agency (NPN {b.npn}). Not connected with or endorsed by the United States government or the federal Medicare program.</p>
     <div class="meta">
       <span>© {b.name} — {b.foundedCity}, {b.state}</span>
-      <span>43.5446° N / 96.7311° W</span>
+      <span><button type="button" class="foot-link" id="footCookies">Cookie settings</button> · <a href="/privacy">Privacy</a></span>
       <span><a href="/llms.txt">llms.txt</a> · <a href="/.well-known/mcp.json">mcp.json</a></span>
     </div>
   </div>
@@ -66,5 +66,10 @@ const company = [
   .legal p{font-size:.78rem;line-height:1.65;color:var(--navy-200);max-width:none;margin:0 0 1rem}
   .meta{display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wrap;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;font-weight:600}
   .meta a{display:inline;color:var(--navy-200)}
+  .foot-link{display:inline;background:none;border:0;padding:0;margin:0;cursor:pointer;color:var(--navy-200);font:inherit;letter-spacing:inherit;text-transform:inherit;transition:color .2s}
+  .foot-link:hover{color:#fff;text-decoration:underline;text-underline-offset:3px}
   @media(max-width:900px){.cols{grid-template-columns:1fr 1fr}}
 </style>
+<script is:inline>
+  (function(){var b=document.getElementById('footCookies');if(b)b.addEventListener('click',function(){if(typeof window.openCookieSettings==='function')window.openCookieSettings();});})();
+</script>

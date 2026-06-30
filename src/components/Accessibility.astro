@@ -1,47 +1,103 @@
 ---
-// Privacy-first accessibility widget (no third-party overlay). Functional controls
-// for low-vision seniors; persists via localStorage. Required compliance feature.
+// Privacy-first accessibility widget (no third-party overlay, no tracking).
+// Functional controls tuned for a 60+ / low-vision audience; persists via
+// localStorage. On-brand (navy + tan soft-UI). Required compliance feature.
 ---
-<button class="a11y-btn" id="a11yBtn" aria-label="Open accessibility tools" aria-expanded="false" title="Accessibility tools">&#9855;</button>
+<button class="a11y-fab" id="a11yBtn" aria-label="Open accessibility tools" aria-expanded="false" aria-controls="a11yPanel" title="Accessibility tools">
+  <svg viewBox="0 0 24 24" width="26" height="26" fill="none" aria-hidden="true">
+    <circle cx="12" cy="4" r="2" fill="currentColor"/>
+    <path d="M4.5 8.5c2.5.9 5 1.3 7.5 1.3s5-.4 7.5-1.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <path d="M12 9.8v4.2m0 0 2.6 6m-2.6-6-2.6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</button>
+
 <div class="a11y-panel" id="a11yPanel" role="dialog" aria-label="Accessibility tools" aria-modal="false">
-  <h2>Accessibility tools</h2>
-  <p class="sub">Adjust the page for easier reading.</p>
-  <div class="a11y-grid">
-    <button class="a11y-opt" data-mode="text" aria-pressed="false"><span class="i">A&#xFE62;</span>Bigger text</button>
-    <button class="a11y-opt" data-mode="contrast" aria-pressed="false"><span class="i">&#9681;</span>High contrast</button>
-    <button class="a11y-opt" data-mode="readable" aria-pressed="false"><span class="i">&#128214;</span>Readable font</button>
-    <button class="a11y-opt" data-mode="links" aria-pressed="false"><span class="i">&#128279;</span>Highlight links</button>
-    <button class="a11y-opt" data-mode="cursor" aria-pressed="false"><span class="i">&#9099;</span>Big cursor</button>
-    <button class="a11y-opt" data-mode="noanim" aria-pressed="false"><span class="i">&#9208;</span>Pause motion</button>
+  <div class="a11y-head">
+    <div>
+      <span class="a11y-eyebrow">Accessibility</span>
+      <h2>Make this page easier to use</h2>
+    </div>
+    <button class="a11y-x" id="a11yClose" aria-label="Close accessibility tools" title="Close">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+    </button>
   </div>
-  <button class="a11y-reset" id="a11yReset">Reset all</button>
+
+  <div class="a11y-grid">
+    <button class="a11y-opt" data-mode="text" aria-pressed="false">
+      <span class="i" aria-hidden="true">A<sup>+</sup></span><span class="l">Bigger text</span><span class="badge" data-badge="text"></span>
+    </button>
+    <button class="a11y-opt" data-mode="contrast" aria-pressed="false">
+      <span class="i" aria-hidden="true">◑</span><span class="l">High contrast</span>
+    </button>
+    <button class="a11y-opt" data-mode="readable" aria-pressed="false">
+      <span class="i" aria-hidden="true">¶</span><span class="l">Readable font</span>
+    </button>
+    <button class="a11y-opt" data-mode="links" aria-pressed="false">
+      <span class="i" aria-hidden="true">&#9741;</span><span class="l">Highlight links</span>
+    </button>
+    <button class="a11y-opt" data-mode="cursor" aria-pressed="false">
+      <span class="i" aria-hidden="true">&#10132;</span><span class="l">Big cursor</span>
+    </button>
+    <button class="a11y-opt" data-mode="noanim" aria-pressed="false">
+      <span class="i" aria-hidden="true">&#9208;</span><span class="l">Pause motion</span>
+    </button>
+  </div>
+
+  <button class="a11y-reset" id="a11yReset">Reset all settings</button>
+  <p class="a11y-note">Saved on this device only. We never track your accessibility choices.</p>
 </div>
+
 <script is:inline>
 (function(){
   var root=document.documentElement, KEY='a11y-prefs';
   var prefs={}; try{prefs=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+  var panel=document.getElementById('a11yPanel'), btn=document.getElementById('a11yBtn');
   function apply(){
     root.classList.remove('a11y-text-1','a11y-text-2','a11y-text-3');
     if(prefs.text){root.classList.add('a11y-text-'+prefs.text);}
     ['contrast','readable','links','cursor','noanim'].forEach(function(m){root.classList.toggle('a11y-'+m,!!prefs[m]);});
     document.querySelectorAll('.a11y-opt').forEach(function(b){var m=b.dataset.mode;b.setAttribute('aria-pressed',(m==='text'?!!prefs.text:!!prefs[m])?'true':'false');});
+    var badge=document.querySelector('[data-badge="text"]'); if(badge){badge.textContent=prefs.text?('Level '+prefs.text):'';}
   }
-  document.getElementById('a11yBtn').addEventListener('click',function(){var p=document.getElementById('a11yPanel'),o=p.getAttribute('data-open')==='1';p.setAttribute('data-open',o?'0':'1');this.setAttribute('aria-expanded',String(!o));});
+  function open(){panel.setAttribute('data-open','1');btn.setAttribute('aria-expanded','true');}
+  function close(){panel.setAttribute('data-open','0');btn.setAttribute('aria-expanded','false');btn.focus();}
+  btn.addEventListener('click',function(){panel.getAttribute('data-open')==='1'?close():open();});
+  document.getElementById('a11yClose').addEventListener('click',close);
   document.querySelectorAll('.a11y-opt').forEach(function(b){b.addEventListener('click',function(){var m=b.dataset.mode;if(m==='text'){prefs.text=((prefs.text||0)+1);if(prefs.text>3)prefs.text=0;}else{prefs[m]=!prefs[m];}localStorage.setItem(KEY,JSON.stringify(prefs));apply();});});
   document.getElementById('a11yReset').addEventListener('click',function(){prefs={};localStorage.setItem(KEY,'{}');apply();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&panel.getAttribute('data-open')==='1')close();});
+  document.addEventListener('click',function(e){if(panel.getAttribute('data-open')==='1'&&!panel.contains(e.target)&&e.target!==btn&&!btn.contains(e.target))close();});
   apply();
 })();
 </script>
+
 <style>
-  .a11y-btn{position:fixed;left:1.1rem;bottom:1.1rem;z-index:320;width:56px;height:56px;border-radius:50%;border:0;cursor:pointer;background:var(--teal);color:#fff;box-shadow:0 12px 30px -10px rgba(10,34,51,.5);display:grid;place-items:center;font-size:1.7rem;transition:transform .12s}
-  .a11y-btn:hover{transform:scale(1.06)}
-  .a11y-panel{position:fixed;left:1.1rem;bottom:5rem;z-index:320;width:300px;max-width:calc(100vw - 2.2rem);background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 30px 70px -20px rgba(10,34,51,.5);padding:1rem 1.1rem;display:none}
-  .a11y-panel[data-open="1"]{display:block}
-  .a11y-panel h2{font-family:var(--body);font-weight:700;font-size:1.05rem;margin:0 0 .2rem}
-  .a11y-panel .sub{font-size:.8rem;color:var(--muted);margin:0 0 .8rem}
-  .a11y-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
-  .a11y-opt{display:flex;flex-direction:column;align-items:center;gap:.25rem;padding:.6rem .4rem;border:1.5px solid var(--line);border-radius:11px;background:#fff;cursor:pointer;font:600 .76rem var(--body);color:var(--ink);text-align:center}
-  .a11y-opt .i{font-size:1.2rem}
-  .a11y-opt[aria-pressed="true"]{border-color:var(--teal);background:var(--teal-l);color:var(--teal-d)}
-  .a11y-reset{margin-top:.6rem;width:100%;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:.5rem;cursor:pointer;font:600 .82rem var(--body);color:var(--ink)}
+  .a11y-fab{position:fixed;left:1.1rem;bottom:1.1rem;z-index:320;width:56px;height:56px;border-radius:var(--r-pill);border:2px solid transparent;cursor:pointer;background:var(--navy-700);color:#fff;box-shadow:var(--shadow-lg);display:grid;place-items:center;transition:transform .14s ease,box-shadow .2s,border-color .2s,background .2s}
+  .a11y-fab:hover{transform:translateY(-2px) scale(1.04);background:var(--navy-800);border-color:var(--gold-500);box-shadow:var(--shadow-xl)}
+  .a11y-fab:active{transform:translateY(0) scale(.98)}
+
+  .a11y-panel{position:fixed;left:1.1rem;bottom:5.1rem;z-index:320;width:340px;max-width:calc(100vw - 2.2rem);background:var(--surface-card);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-xl);padding:1.15rem 1.2rem 1.1rem;display:none;transform:translateY(8px) scale(.98);opacity:0;transition:transform .18s ease,opacity .18s ease}
+  .a11y-panel[data-open="1"]{display:block;transform:translateY(0) scale(1);opacity:1}
+
+  .a11y-head{display:flex;align-items:flex-start;justify-content:space-between;gap:.8rem;margin-bottom:1rem}
+  .a11y-eyebrow{font-family:var(--font-sans);font-size:.7rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-warm);display:block;margin-bottom:.2rem}
+  .a11y-panel h2{font-family:var(--font-display);font-weight:700;font-size:1.12rem;line-height:1.2;margin:0;color:var(--ink-900)}
+  .a11y-x{flex:none;width:32px;height:32px;border-radius:var(--r-pill);border:1px solid var(--line);background:var(--surface-panel);color:var(--text-muted);display:grid;place-items:center;cursor:pointer;transition:color .2s,border-color .2s,background .2s}
+  .a11y-x:hover{color:var(--ink-900);border-color:var(--line-strong);background:var(--paper)}
+
+  .a11y-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+  .a11y-opt{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.35rem;padding:.85rem .4rem;border:1.5px solid var(--line);border-radius:var(--r-md);background:var(--paper);cursor:pointer;color:var(--ink-800);text-align:center;transition:border-color .18s,background .18s,box-shadow .18s,transform .12s}
+  .a11y-opt:hover{border-color:var(--navy-400);box-shadow:var(--shadow-xs);transform:translateY(-1px)}
+  .a11y-opt .i{font-size:1.35rem;line-height:1;color:var(--navy-700);font-family:var(--font-display);font-weight:700}
+  .a11y-opt .i sup{font-size:.62em}
+  .a11y-opt .l{font:600 .78rem/1.15 var(--font-sans)}
+  .a11y-opt[aria-pressed="true"]{border-color:var(--navy-700);background:var(--navy-050);box-shadow:inset 0 0 0 1px var(--navy-700)}
+  .a11y-opt[aria-pressed="true"] .i{color:var(--navy-800)}
+  .a11y-opt[aria-pressed="true"]::after{content:"✓";position:absolute;top:.4rem;right:.5rem;font-size:.72rem;font-weight:800;color:#fff;background:var(--navy-700);width:16px;height:16px;border-radius:50%;display:grid;place-items:center}
+  .a11y-opt .badge{position:absolute;bottom:.32rem;left:0;right:0;font-size:.58rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--accent-warm)}
+  .a11y-opt[data-mode="text"]{padding-bottom:1.15rem}
+
+  .a11y-reset{margin-top:.85rem;width:100%;background:var(--surface-panel);border:1px solid var(--line);border-radius:var(--r-pill);padding:.6rem;cursor:pointer;font:600 .85rem var(--font-sans);color:var(--ink-800);transition:background .2s,border-color .2s}
+  .a11y-reset:hover{background:var(--paper);border-color:var(--line-strong)}
+  .a11y-note{margin:.7rem 0 0;font-size:.7rem;line-height:1.45;color:var(--text-muted);text-align:center}
 </style>

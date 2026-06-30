@@ -15,7 +15,7 @@ The **readiness audit**. Answers *"is this page structurally ready to publish?"*
 
 ## Scope — page-level vs site-level
 - **Page-level (every page):** schema-done-right, one H1, answer-first intro, content capsules (Q-as-H2), internal links, image SEO, insurance compliance (below), HIPAA pixel (below).
-- **Site-level (ONCE):** `/llms.txt` (+ Tools section), robots/WAF not blocking AI bots, WebMCP (`/.well-known/mcp.json` + `/mcp` executes), XML sitemap.
+- **Site-level (ONCE):** `/llms.txt` (+ Tools section), robots/WAF not blocking AI bots, WebMCP (`/.well-known/mcp.json` + `/mcp` executes), XML sitemap, **accessibility widget** (functional, no-tracking overlay), **cookie-consent manager** (consent-gated tracking + reopenable from the footer).
 
 ## The checks (score ✅ / ⚠️ / ❌; 🔴 = blocks publish)
 **Phase 0 — Agentic readiness:** WebMCP exposed & callable · llms.txt present · schema done right for the page type (validated, zero errors).
@@ -23,16 +23,17 @@ The **readiness audit**. Answers *"is this page structurally ready to publish?"*
 **Phase 2 — Trust & sourcing (E-E-A-T):** every claim backed (ideally a number) · sources linked inline · author bio + schema (YMYL: author = Org "Data Desk", NOT a single Person; the human is byline/`reviewedBy`).
 **Phase 3 — Technical pre-flight:** loads fast (CWV) · image SEO (WebP/AVIF, alt, lazy) · bots not blocked · indexable (no stray noindex; **self-referencing canonical** — a canonical pointing at a parked/placeholder domain = 🔴) · human title/meta · internal links in & out.
 **Phase 4 — Submit & measure:** Google Search Console submitted · Bing Webmaster submitted (feeds ChatGPT). *(Off-page — mark "could not verify" if unknown.)*
+**Phase 4b — Required site widgets (P0):** **Accessibility widget** present & functional (text size, contrast, readable font, highlight links, big cursor, pause motion — privacy-first, NO third-party overlay that injects tracking) · **Cookie-consent manager** present, defaults to no non-essential tracking, offers granular categories, and is **reopenable from the footer** ("Cookie settings" → `window.openCookieSettings()`). A missing/ornamental (non-functional) widget = ❌.
 **Phase 5 — Freshness:** flag content 10–16 months old / outdated stats / old `dateModified` for refresh.
 
 **Four-Pillar AI Citation (P0 — any miss = NOT READY):** Pillar 1 Article/WebPage + Org "Data Desk" author + dates · Pillar 2 FAQPage (3–5 real-query Q&A) · Pillar 3 Dataset per .gov source (`creator.url` = exact endpoint) · Pillar 4 site-level llms.txt + AI-bots-allowed + WebMCP.
 
 **Insurance compliance (Part J — reason about the words, P0 if FIX-REQUIRED):** flag exact banned superlatives ("the best", "#1", "cheapest", "top-rated", "best rate"), "every/all plans" overclaims (CMS TPMO), implied government affiliation, "$0 = free", guaranteed savings/returns, missing TPMO/HealthCare.gov/no-guarantee disclaimers, TCPA. Do NOT flag legitimate product terms ("guaranteed issue/level/acceptance"). Also flag demo placeholders (fake phone, `DEMO-NPN`). Return offending phrase + rule + rewrite.
 
-**★ HIPAA / pixel gate (Part K — P0 for health/Medicare/ACA/life/finance):** detect REAL client-side trackers — `fbq(`, `connect.facebook.net`, `fbevents`, `gtag(`, `googletagmanager`, GA4 id `G-ABC1234` (UPPERCASE). **Ignore CSS classes like `g-bottom`.** On a health vertical, ANY firing client-side = **❌ LIABILITY (HIPAA/CIPA) — DEDUCT + WARN, never credit**; worse pre-consent. PASS = no client-side pixels + server-side + consent-gated (+ BAA). Non-health verticals (P&C): client-side analytics is fine. Cross-check `pixel-liability-audit` for PHI-capturing pages.
+**★ HIPAA / pixel gate (Part K — P0 for health/Medicare/ACA/life/finance):** detect REAL client-side trackers — `fbq(`, `connect.facebook.net`, `fbevents`, `gtag(`, `googletagmanager`, GA4 id `G-ABC1234` (UPPERCASE). **Ignore CSS classes like `g-bottom`.** On a health vertical, ANY firing client-side = **❌ LIABILITY (HIPAA/CIPA) — DEDUCT + WARN, never credit**; worse pre-consent. PASS = no client-side pixels + server-side + **consent-gated by a real cookie-consent manager** that loads nothing non-essential until opt-in (+ BAA). A health page that ships a pixel with **no consent manager**, or one that fires **before** the visitor opts in, = ❌. Non-health verticals (P&C): client-side analytics is fine. Cross-check `pixel-liability-audit` for PHI-capturing pages.
 
 ## Verdict
-**NOT READY** if any 🔴 / any Four-Pillar miss / Part J FIX-REQUIRED / Part K LIABILITY. **NEAR** = only should-fixes. **READY** = all page-level + site-level clean.
+**NOT READY** if any 🔴 / any Four-Pillar miss / Part J FIX-REQUIRED / Part K LIABILITY / missing-or-broken accessibility widget or cookie-consent manager (Phase 4b). **NEAR** = only should-fixes. **READY** = all page-level + site-level clean.
 
 ## Output (per page)
 ```
@@ -43,7 +44,7 @@ Compliance (J): PASS | FIX REQUIRED — "<phrase>" (<where>) breaks <rule> → "
 HIPAA/pixel (K): PASS | LIABILITY (<tracker>, <pre/post>-consent)
 🔴 / 🟡 / 🟢 findings — <one-line fix each>
 ```
-Site-level block once: `llms.txt <p/f> · AI-bots <p/f> · WebMCP <p/f> · sitemap <p/f>`.
+Site-level block once: `llms.txt <p/f> · AI-bots <p/f> · WebMCP <p/f> · sitemap <p/f> · a11y-widget <p/f> · cookie-consent <p/f>`.
 
 ## Guardrails
 - Read-only. Quote real evidence (actual title length, the `@type` found, the exact tracker). Never "add schema" — say which type, which page, why.

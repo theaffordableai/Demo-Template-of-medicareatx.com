@@ -72,6 +72,8 @@ Inject in `<head>` on every page:
 - [ ] 🔴 Four Pillars on EVERY page: Article/Service/LocalBusiness + **Org "Data Desk" author** + FAQPage + **Dataset**; site-level **llms.txt + WebMCP**, AI crawlers unblocked
 - [ ] 🔴 Niche compliance: Medicare TPMO + non-affiliation, no banned superlatives, no "all/every plan", no "free" misuse / ACA HealthCare.gov + caveats / life no-guarantees; informational-only; TCPA on CTAs
 - [ ] 🔴 GHL lead capture wired; no fabricated data in any field
+- [ ] 🔴 **Accessibility widget** (functional, privacy-first — text size / contrast / readable font / highlight links / big cursor / pause motion; NO third-party tracking overlay) on every page
+- [ ] 🔴 **Cookie-consent manager** on every page: nothing non-essential fires before opt-in, granular categories (necessary/analytics/marketing), and **reopenable from the footer** (`window.openCookieSettings()`); tracking/chat pixels gated through it (HIPAA/CIPA Part K)
 - [ ] 🔴 Build clean; canonical = production domain; leak-check = 0; desktop + mobile tested
 - [ ] 🔴 `aeo-website-checklist` run on key pages — all 🔴 resolved (Four-Pillar + Parts J/K); `page-quality-score` ≥85
 
